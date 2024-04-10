@@ -164,8 +164,8 @@ function App() {
       config={{
         meetingId,
         micEnabled: true,
-        webcamEnabled: true,
-        name: "C.V. Raman",
+        webcamEnabled: false,
+        name: "Akshay",
       }}
       token={authToken}
     >
