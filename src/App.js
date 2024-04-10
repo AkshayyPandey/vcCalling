@@ -1,6 +1,5 @@
 import "./App.css";
-import React, { useEffect, useRef, useState,useMemo } from "react";
-import ReactPlayer from 'react-player';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   MeetingProvider,
   MeetingConsumer,
@@ -8,6 +7,7 @@ import {
   useParticipant,
 } from "@videosdk.live/react-sdk";
 import { authToken, createMeeting } from "./API";
+import ReactPlayer from "react-player";
 
 function JoinScreen({ getMeetingAndToken }) {
   const [meetingId, setMeetingId] = useState(null);
@@ -30,11 +30,7 @@ function JoinScreen({ getMeetingAndToken }) {
   );
 }
 
-// function VideoComponent(props) {
-//   return null;
-// }
-
-function VideoComponent(props) {
+function ParticipantView(props) {
   const micRef = useRef(null);
   const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
     useParticipant(props.participantId);
@@ -95,23 +91,16 @@ function VideoComponent(props) {
   );
 }
 
-function Controls() {
-  const { leave, toggleMic, toggleWebcam } = useMeeting();
-  return (
-    <div>
-      <button onClick={() => leave()}>Leave</button>
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
-    </div>
-  );
-}
-
-function Container(props) {
+function MeetingView(props) {
   const [joined, setJoined] = useState(null);
+  //Get the method which will be used to join the meeting.
+  //We will also get the participants list to display all participants
   const { join, participants } = useMeeting({
+    //callback for when meeting is joined successfully
     onMeetingJoined: () => {
       setJoined("JOINED");
     },
+    //callback for when meeting is left
     onMeetingLeft: () => {
       props.onMeetingLeave();
     },
@@ -127,8 +116,9 @@ function Container(props) {
       {joined && joined == "JOINED" ? (
         <div>
           <Controls />
+          //For rendering all the participants in the meeting
           {[...participants.keys()].map((participantId) => (
-            <VideoComponent
+            <ParticipantView
               participantId={participantId}
               key={participantId}
             />
@@ -143,13 +133,30 @@ function Container(props) {
   );
 }
 
+function Controls() {
+  const { leave, toggleMic, toggleWebcam } = useMeeting();
+  return (
+    <div>
+      <button onClick={() => leave()}>Leave</button>
+      <button onClick={() => toggleMic()}>toggleMic</button>
+      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+    </div>
+  );
+}
+
 function App() {
   const [meetingId, setMeetingId] = useState(null);
 
+  //Getting the meeting id by calling the api we just wrote
   const getMeetingAndToken = async (id) => {
     const meetingId =
       id == null ? await createMeeting({ token: authToken }) : id;
     setMeetingId(meetingId);
+  };
+
+  //This will set Meeting Id to null when meeting is left or ended
+  const onMeetingLeave = () => {
+    setMeetingId(null);
   };
 
   return authToken && meetingId ? (
@@ -157,14 +164,12 @@ function App() {
       config={{
         meetingId,
         micEnabled: true,
-        webcamEnabled: false,
-        name: "Akshay",
+        webcamEnabled: true,
+        name: "C.V. Raman",
       }}
       token={authToken}
     >
-      <MeetingConsumer>
-        {() => <Container meetingId={meetingId} />}
-      </MeetingConsumer>
+      <MeetingView meetingId={meetingId} onMeetingLeave={onMeetingLeave} />
     </MeetingProvider>
   ) : (
     <JoinScreen getMeetingAndToken={getMeetingAndToken} />
