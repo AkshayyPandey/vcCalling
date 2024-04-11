@@ -15,17 +15,24 @@ function JoinScreen({ getMeetingAndToken }) {
     await getMeetingAndToken(meetingId);
   };
   return (
-    <div>
+    <div className="meetingCreation">
+      <div>
       <input
         type="text"
         placeholder="Enter Meeting Id"
         onChange={(e) => {
           setMeetingId(e.target.value);
         }}
+        className="ButonControl"
       />
-      <button onClick={onClick}>Join</button>
-      {" or "}
-      <button onClick={onClick}>Create Meeting</button>
+      <button onClick={onClick} className="ButonControl">Join</button>
+      </div>
+      <div className="otherOption">
+        <h2>OR</h2>
+      </div>
+      <div>
+      <button onClick={onClick} className="ButonControl">Create Meeting</button>
+      </div>
     </div>
   );
 }
@@ -117,7 +124,7 @@ function MeetingView(props) {
   };
 
   return (
-    <div className="container">
+    <div className="JoinScreen">
       <h3>Meeting Id: {props.meetingId}</h3>
       {joined && joined == "JOINED" ? (
         <div>
@@ -134,7 +141,7 @@ function MeetingView(props) {
       ) : joined && joined === "JOINING" ? (
         <p>Joining the meeting...</p>
       ) : (
-        <button onClick={joinMeeting}>Join</button>
+        <button onClick={joinMeeting} className="joinControlButton">Join</button>
       )}
     </div>
   );
